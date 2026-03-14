@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AcadMap — Student Academic Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: #1e2d45;
+  --accent: #3b82f6;
+  --accent2: #06b6d4;
+  --accent3: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --radius: 14px;
+  --font: 'Sora', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* BG decoration */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(24px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.logo-text { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-text span { color: var(--accent); }
+
+.login-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.login-sub { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-input.error-field {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Error message */
+.error-msg {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #fca5a5;
+  margin-top: 8px;
+}
+.error-msg.show { display: flex; animation: fadeIn 0.3s ease; }
+.error-msg .error-icon { font-size: 16px; flex-shrink: 0; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(-4px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* Success message */
+.success-msg {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #6ee7b7;
+  margin-top: 8px;
+}
+.success-msg.show { display: flex; animation: fadeIn 0.3s ease; }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), #2563eb);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.btn:hover { opacity: 0.92; box-shadow: 0 8px 24px rgba(59,130,246,0.35); }
+.btn:active { transform: scale(0.99); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: shimmer 1s infinite;
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.login-hint {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 20px;
+  text-align: center;
+  font-family: var(--mono);
+}
+
+/* Error codes badge */
+.error-code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: rgba(239,68,68,0.2);
+  color: #fca5a5;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+/* Attempt counter */
+.attempt-bar {
+  display: none;
+  margin-top: 12px;
+}
+.attempt-bar.show { display: block; }
+.attempt-bar-label {
+  font-size: 12px;
+  color: var(--warning);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.attempt-dots {
+  display: flex;
+  gap: 6px;
+}
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.dot.used { background: var(--warning); }
+.dot.last { background: var(--error); }
+
+/* Lockout */
+.lockout-msg {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 12px;
+  margin-top: 12px;
+}
+.lockout-msg.show { display: flex; animation: fadeIn 0.4s ease; }
+.lockout-icon { font-size: 36px; margin-bottom: 12px; }
+.lockout-title { font-size: 16px; font-weight: 600; color: #fca5a5; margin-bottom: 6px; }
+.lockout-sub { font-size: 13px; color: var(--text2); }
+.countdown {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--error);
+  margin: 16px 0 8px;
+}
+
+/* ===== MAIN APP ===== */
+#appScreen {
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text2);
+}
+.nav-avatar {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+.nav-logout {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-logout:hover { border-color: var(--error); color: #fca5a5; }
+
+/* App Content */
+.app-content {
+  flex: 1;
+  padding: 32px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Step indicator */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 36px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  transition: all 0.3s;
+}
+.step-item.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 12px rgba(59,130,246,0.4);
+}
+.step-item.done .step-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+.step-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  transition: color 0.3s;
+}
+.step-item.active .step-label { color: var(--text); }
+.step-item.done .step-label { color: var(--success); }
+.step-line {
+  height: 1px;
+  width: 32px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Step pages */
+.step-page { display: none; animation: slideUp 0.4s ease; }
+.step-page.active { display: block; }
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.page-sub { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+/* Faculty & Branch grid */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.select-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.select-card:hover {
+  border-color: rgba(59,130,246,0.4);
+  background: rgba(59,130,246,0.05);
+}
+.select-card.selected {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.08);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.select-card .card-icon { font-size: 28px; margin-bottom: 10px; }
+.select-card .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.select-card .card-sub { font-size: 12px; color: var(--text2); }
+.select-card .check {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.select-card.selected .check { opacity: 1; }
+
+/* Year selector */
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-width: 560px;
+  margin-bottom: 28px;
+}
+.year-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.year-card:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-2px); }
+.year-card.selected {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(59,130,246,0.2);
+}
+.year-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.year-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* Courses */
+.courses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: gap;
+  gap: 12px;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text2);
+}
+.breadcrumb span { color: var(--text); font-weight: 500; }
+.breadcrumb .sep { color: var(--text3); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+}
+.tag.blue { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
+.tag.purple { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: #c4b5fd; }
+.tag.green { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+
+.course-list { display: flex; flex-direction: column; gap: 16px; }
+
+.course-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.course-card:hover { border-color: rgba(59,130,246,0.3); }
+
+.course-header {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+.course-meta { flex: 1; }
+.course-code {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent2);
+  margin-bottom: 5px;
+}
+.course-name { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.course-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.course-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.course-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+.course-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.course-body.open { display: block; animation: slideDown 0.25s ease; }
+
+@keyframes slideDown {
+  from { opacity:0; transform: translateY(-8px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.course-detail {
+  padding: 20px;
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.7;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Reviews */
+.reviews-section { padding: 20px; }
+.reviews-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.reviews-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+
+.review-item {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.review-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.review-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+.review-author { font-size: 13px; font-weight: 600; }
+.review-year { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.review-stars { margin-left: auto; font-size: 13px; }
+.review-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+.review-files {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.file-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--mono);
+}
+.file-badge:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Add review form */
+.add-review {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px dashed var(--border);
+}
+.add-review-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+
+.review-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.review-input:focus { border-color: var(--accent); }
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.btn-sm {
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-sm:hover { opacity: 0.85; }
+
+.btn-file {
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-file:hover { border-color: var(--accent); color: var(--accent); }
+
+.star-select { display: flex; gap: 4px; cursor: pointer; }
+.star-select span { font-size: 18px; transition: transform 0.1s; }
+.star-select span:hover { transform: scale(1.2); }
+
+.file-preview {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #93c5fd;
+  font-family: var(--mono);
+}
+.file-chip .remove {
+  cursor: pointer;
+  color: var(--text3);
+  margin-left: 4px;
+  font-family: var(--font);
+}
+.file-chip .remove:hover { color: var(--error); }
+
+/* Submit error */
+.submit-error {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: #fca5a5;
+  margin-top: 10px;
+}
+.submit-error.show { display: flex; animation: fadeIn 0.3s ease; }
+
+/* Permission error */
+.perm-error {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 24px 0;
+}
+.perm-icon { font-size: 28px; }
+.perm-title { font-size: 15px; font-weight: 600; color: #fcd34d; margin-bottom: 4px; }
+.perm-sub { font-size: 13px; color: var(--text2); }
+
+/* Next btn */
+.btn-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: linear-gradient(135deg, var(--accent), #2563eb);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+}
+.btn-next:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,0.4); }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-back {
+  padding: 12px 22px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-back:hover { border-color: var(--text2); color: var(--text); }
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+  z-index: 999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 340px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: rgba(239,68,68,0.4); }
+.toast.success { border-color: rgba(16,185,129,0.4); }
+.toast-icon { font-size: 18px; }
+.toast-text { flex: 1; }
+.toast-close {
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 16px;
+  padding: 2px;
+  transition: color 0.2s;
+}
+.toast-close:hover { color: var(--text); }
+
+/* Error boundary banner */
+.error-banner {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.error-banner.show { display: flex; animation: fadeIn 0.3s ease; }
+.error-banner .eb-icon { font-size: 20px; flex-shrink: 0; }
+.error-banner .eb-title { font-size: 14px; font-weight: 600; color: #fca5a5; }
+.error-banner .eb-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.btn-retry {
+  margin-left: auto;
+  padding: 7px 14px;
+  background: none;
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 7px;
+  color: #fca5a5;
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.btn-retry:hover { background: rgba(239,68,68,0.1); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .year-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .app-content { padding: 20px 16px; }
+  .login-card { padding: 32px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======= LOGIN SCREEN ======= -->
+<div id="loginScreen" class="screen active">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div class="logo-text">Acad<span>Map</span></div>
+    </div>
+
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in with your student account to continue</div>
+
+    <div class="form-group">
+      <label class="form-label">Student ID</label>
+      <input id="studentId" class="form-input" type="text" placeholder="e.g. 6601234567" maxlength="10">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input id="password" class="form-input" type="password" placeholder="Enter your password">
+    </div>
+
+    <!-- Error messages -->
+    <div id="errEmpty" class="error-msg">
+      <span class="error-icon">⚠️</span>
+      <span>Please fill in all fields before continuing.</span>
+      <span class="error-code">ERR_001</span>
+    </div>
+
+    <div id="errFormat" class="error-msg">
+      <span class="error-icon">🔢</span>
+      <span>Student ID must be 10 digits.</span>
+      <span class="error-code">ERR_002</span>
+    </div>
+
+    <div id="errWrong" class="error-msg">
+      <span class="error-icon">🔒</span>
+      <span>Incorrect Student ID or password. Please try again.</span>
+      <span class="error-code">ERR_003</span>
+    </div>
+
+    <!-- Attempt counter -->
+    <div id="attemptBar" class="attempt-bar">
+      <div class="attempt-bar-label">
+        <span>⚠️ Failed attempts</span>
+        <span id="attemptCount">0 / 3</span>
+      </div>
+      <div class="attempt-dots">
+        <div class="dot" id="dot1"></div>
+        <div class="dot" id="dot2"></div>
+        <div class="dot" id="dot3"></div>
+      </div>
+    </div>
+
+    <!-- Lockout -->
+    <div id="lockoutMsg" class="lockout-msg">
+      <div class="lockout-icon">🔐</div>
+      <div class="lockout-title">Account Temporarily Locked</div>
+      <div class="lockout-sub">Too many failed attempts. Please wait before trying again.</div>
+      <div class="countdown" id="countdownDisplay">30</div>
+      <div style="font-size:12px;color:var(--text3)">seconds remaining</div>
+    </div>
+
+    <button id="loginBtn" class="btn" onclick="handleLogin()">Sign In</button>
+
+    <div class="login-hint">
+      💡 Demo: use ID <strong>6601234567</strong> / pass <strong>demo123</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ======= APP SCREEN ======= -->
+<div id="appScreen" class="screen">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">🎓</div>
+      <span>Acad<strong>Map</strong></span>
+    </div>
+    <div class="nav-user">
+      <span id="navName" style="font-size:13px;color:var(--text2)"></span>
+      <div class="nav-avatar" id="navAvatar">S</div>
+      <button class="nav-logout" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="app-content">
+
+    <!-- Error banner (general) -->
+    <div id="errorBanner" class="error-banner">
+      <span class="eb-icon">⚠️</span>
+      <div>
+        <div class="eb-title">Something went wrong</div>
+        <div class="eb-sub" id="errorBannerMsg"></div>
+      </div>
+      <button class="btn-retry" onclick="dismissBanner()">Dismiss</button>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="steps">
+      <div class="step-item active" id="step-ind-1">
+        <div class="step-num">1</div>
+        <div class="step-label">Faculty</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="step-ind-2">
+        <div class="step-num">2</div>
+        <div class="step-label">Branch</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="step-ind-3">
+        <div class="step-num">3</div>
+        <div class="step-label">Year</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="step-ind-4">
+        <div class="step-num">4</div>
+        <div class="step-label">Courses</div>
+      </div>
+    </div>
+
+    <!-- ---- STEP 1: Faculty ---- -->
+    <div id="stepFaculty" class="step-page active">
+      <div class="page-title">Select Your Faculty</div>
+      <div class="page-sub">Choose the faculty you are enrolled in</div>
+      <div class="grid-2" id="facultyGrid"></div>
+      <div id="errFaculty" class="error-msg" style="max-width:400px">
+        <span class="error-icon">⚠️</span>
+        <span>Please select a faculty to continue.</span>
+      </div>
+      <div class="action-row" style="margin-top:20px">
+        <button class="btn-next" onclick="goStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 2: Branch ---- -->
+    <div id="stepBranch" class="step-page">
+      <div class="page-title">Select Your Branch</div>
+      <div class="page-sub" id="branchSub">Choose your major / branch</div>
+      <div class="grid-2" id="branchGrid"></div>
+      <div id="errBranch" class="error-msg" style="max-width:400px">
+        <span class="error-icon">⚠️</span>
+        <span>Please select a branch to continue.</span>
+      </div>
+      <div class="action-row" style="margin-top:20px">
+        <button class="btn-back" onclick="goStep(1)">← Back</button>
+        <button class="btn-next" onclick="goStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 3: Year ---- -->
+    <div id="stepYear" class="step-page">
+      <div class="page-title">Select Academic Year</div>
+      <div class="page-sub">Which year are you studying?</div>
+      <div class="year-grid" id="yearGrid"></div>
+      <div id="errYear" class="error-msg" style="max-width:400px">
+        <span class="error-icon">⚠️</span>
+        <span>Please select your year to continue.</span>
+      </div>
+      <div class="action-row" style="margin-top:20px">
+        <button class="btn-back" onclick="goStep(2)">← Back</button>
+        <button class="btn-next" onclick="goStep(4)">View Courses →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 4: Courses ---- -->
+    <div id="stepCourses" class="step-page">
+      <div class="courses-header">
+        <div>
+          <div class="page-title" id="courseTitle">Courses</div>
+          <div id="courseBreadcrumb" class="breadcrumb" style="margin-top:6px"></div>
+        </div>
+        <button class="btn-back" onclick="goStep(3)" style="align-self:flex-start">← Change Year</button>
+      </div>
+      <div id="courseList" class="course-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <span class="toast-text" id="toastText"></span>
+  <span class="toast-close" onclick="closeToast()">✕</span>
+</div>
+
+<script>
+// ======== DATA ========
+const FACULTIES = [
+  { id: 'engineering', icon: '⚙️', name: 'Engineering', sub: '12 branches' },
+  { id: 'science', icon: '🔬', name: 'Science', sub: '8 branches' },
+  { id: 'business', icon: '💼', name: 'Business Admin', sub: '6 branches' },
+  { id: 'medicine', icon: '🏥', name: 'Medicine', sub: '5 branches' },
+  { id: 'arts', icon: '🎨', name: 'Arts & Design', sub: '7 branches' },
+  { id: 'it', icon: '💻', name: 'Information Tech', sub: '4 branches' },
+];
+
+const BRANCHES = {
+  engineering: [
+    { id: 'ce', name: 'Computer Engineering', icon: '🖥️' },
+    { id: 'ee', name: 'Electrical Eng.', icon: '⚡' },
+    { id: 'me', name: 'Mechanical Eng.', icon: '🔧' },
+    { id: 'civil', name: 'Civil Engineering', icon: '🏗️' },
+  ],
+  science: [
+    { id: 'cs', name: 'Computer Science', icon: '🧮' },
+    { id: 'math', name: 'Mathematics', icon: '📐' },
+    { id: 'physics', name: 'Physics', icon: '🔭' },
+    { id: 'chem', name: 'Chemistry', icon: '⚗️' },
+  ],
+  business: [
+    { id: 'fin', name: 'Finance', icon: '💰' },
+    { id: 'mkt', name: 'Marketing', icon: '📣' },
+    { id: 'acc', name: 'Accounting', icon: '📊' },
+  ],
+  medicine: [
+    { id: 'md', name: 'General Medicine', icon: '🩺' },
+    { id: 'nurse', name: 'Nursing', icon: '💊' },
+  ],
+  arts: [
+    { id: 'design', name: 'Graphic Design', icon: '🎨' },
+    { id: 'film', name: 'Film & Media', icon: '🎬' },
+  ],
+  it: [
+    { id: 'is', name: 'Information Systems', icon: '🗄️' },
+    { id: 'nw', name: 'Network & Security', icon: '🔐' },
+    { id: 'ai', name: 'AI & Data Science', icon: '🤖' },
+  ],
+};
+
+const COURSES = {
+  'ce-1': [
+    {
+      code: 'CPE101', name: 'Introduction to Programming', credits: 3,
+      type: 'Core', difficulty: 'Beginner',
+      desc: 'Fundamentals of programming using Python. Covers variables, control flow, functions, and basic data structures. A great starting point for all Computer Engineering students.',
+      reviews: [
+        { author: 'P\'Nook', year: '3rd Year CE', stars: 5, color: '#3b82f6', text: 'Best intro course! The professor gives lots of examples. If you practice coding every day you\'ll pass easily.', files: ['CPE101_Notes_Week1.pdf', 'Exercises.zip'] },
+        { author: 'P\'Fah', year: '4th Year CE', stars: 4, color: '#8b5cf6', text: 'Don\'t underestimate this course. Focus on the logic, not just syntax. Final project counts 40%.', files: [] },
+      ]
+    },
+    {
+      code: 'CPE102', name: 'Calculus for Engineers I', credits: 3,
+      type: 'Math', difficulty: 'Medium',
+      desc: 'Limits, derivatives, integrals, and their applications in engineering contexts. Strong math foundation is required for later courses.',
+      reviews: [
+        { author: 'P\'Krit', year: '2nd Year CE', stars: 3, color: '#10b981', text: 'Tough but manageable. Do all the exercises in the textbook. Midterm has tricky problems.', files: ['Calculus_Cheatsheet.pdf'] },
+      ]
+    },
+    {
+      code: 'CPE103', name: 'Digital Logic Design', credits: 3,
+      type: 'Core', difficulty: 'Medium',
+      desc: 'Boolean algebra, logic gates, combinational and sequential circuits. Lab sessions require hands-on circuit building.',
+      reviews: [
+        { author: 'P\'Best', year: '3rd Year CE', stars: 5, color: '#f59e0b', text: 'Super fun course! The lab is the best part. Make sure to read the lab manual before each session.', files: ['LogicDesign_Lab1.pdf'] },
+      ]
+    },
+  ],
+  'ce-2': [
+    {
+      code: 'CPE201', name: 'Data Structures & Algorithms', credits: 3,
+      type: 'Core', difficulty: 'Hard',
+      desc: 'Arrays, linked lists, trees, graphs, sorting, and searching algorithms. One of the most important courses for software careers.',
+      reviews: [
+        { author: 'P\'Nook', year: '3rd Year CE', stars: 4, color: '#3b82f6', text: 'Hard but rewarding. LeetCode practice before exams is a must. The professor loves asking Big-O questions.', files: ['DSA_Summary.pdf'] },
+      ]
+    },
+    {
+      code: 'CPE202', name: 'Computer Architecture', credits: 3,
+      type: 'Core', difficulty: 'Medium',
+      desc: 'CPU design, memory hierarchy, instruction sets, pipelining, and performance evaluation.',
+      reviews: []
+    },
+  ],
+  'ce-3': [
+    {
+      code: 'CPE301', name: 'Operating Systems', credits: 3,
+      type: 'Core', difficulty: 'Hard',
+      desc: 'Process management, memory management, file systems, and concurrency. Projects involve implementing OS components.',
+      reviews: [
+        { author: 'P\'Fah', year: '4th Year CE', stars: 4, color: '#8b5cf6', text: 'Heavy course load. Start assignments early! The deadlines sneak up on you.', files: ['OS_Project_Template.zip'] },
+      ]
+    },
+    {
+      code: 'CPE302', name: 'Computer Networks', credits: 3,
+      type: 'Core', difficulty: 'Medium',
+      desc: 'TCP/IP model, routing, switching, and network security fundamentals. Wireshark labs included.',
+      reviews: []
+    },
+  ],
+  'ce-4': [
+    {
+      code: 'CPE401', name: 'Senior Project I', credits: 3,
+      type: 'Project', difficulty: 'Advanced',
+      desc: 'First part of the capstone project. Students propose, design, and begin developing a real-world engineering solution.',
+      reviews: [
+        { author: 'P\'Best', year: '4th Year CE', stars: 5, color: '#f59e0b', text: 'Pick a topic you\'re truly passionate about — you\'ll spend a whole year on it. Start finding your advisor in Year 3!', files: [] },
+      ]
+    },
+    {
+      code: 'CPE402', name: 'Machine Learning Fundamentals', credits: 3,
+      type: 'Elective', difficulty: 'Hard',
+      desc: 'Supervised and unsupervised learning, neural networks, model evaluation, and practical applications with Python.',
+      reviews: []
+    },
+  ],
+};
+
+// State
+let state = {
+  faculty: null,
+  branch: null,
+  year: null,
+  attempts: 0,
+  locked: false,
+};
+
+let countdownTimer = null;
+let toastTimer = null;
+
+// ======== LOGIN ========
+function handleLogin() {
+  if (state.locked) return;
+
+  clearErrors();
+  const id = document.getElementById('studentId').value.trim();
+  const pw = document.getElementById('password').value;
+
+  const loginBtn = document.getElementById('loginBtn');
+
+  if (!id || !pw) {
+    showLoginError('errEmpty');
+    shakeField(!id ? 'studentId' : 'password');
+    return;
+  }
+
+  if (!/^\d{10}$/.test(id)) {
+    showLoginError('errFormat');
+    shakeField('studentId');
+    return;
+  }
+
+  // Simulate loading
+  loginBtn.disabled = true;
+  loginBtn.classList.add('btn-loading');
+  loginBtn.textContent = 'Signing in...';
+
+  setTimeout(() => {
+    loginBtn.disabled = false;
+    loginBtn.classList.remove('btn-loading');
+    loginBtn.textContent = 'Sign In';
+
+    if (id === '6601234567' && pw === 'demo123') {
+      // Success
+      document.getElementById('navName').textContent = 'Student ' + id;
+      document.getElementById('navAvatar').textContent = id[0];
+      switchScreen('appScreen');
+      showToast('success', '✅', 'Login successful! Welcome to AcadMap.');
+    } else {
+      // Failed
+      state.attempts++;
+      showLoginError('errWrong');
+      shakeField('studentId');
+      shakeField('password');
+      document.getElementById('password').value = '';
+
+      updateAttemptDots();
+
+      if (state.attempts >= 3) {
+        lockAccount();
+      }
+    }
+  }, 900);
+}
+
+function showLoginError(id) {
+  document.getElementById(id).classList.add('show');
+}
+
+function clearErrors() {
+  ['errEmpty','errFormat','errWrong'].forEach(e => {
+    document.getElementById(e).classList.remove('show');
+  });
+  ['studentId','password'].forEach(f => {
+    document.getElementById(f).classList.remove('error-field');
+  });
+}
+
+function shakeField(id) {
+  const el = document.getElementById(id);
+  el.classList.add('error-field');
+  setTimeout(() => el.classList.remove('error-field'), 600);
+}
+
+function updateAttemptDots() {
+  document.getElementById('attemptBar').classList.add('show');
+  document.getElementById('attemptCount').textContent = state.attempts + ' / 3';
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'dot';
+    if (i <= state.attempts) {
+      dot.classList.add(i === 3 ? 'last' : 'used');
+    }
+  }
+}
+
+function lockAccount() {
+  state.locked = true;
+  document.getElementById('lockoutMsg').classList.add('show');
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').textContent = 'Account Locked';
+  document.getElementById('studentId').disabled = true;
+  document.getElementById('password').disabled = true;
+
+  let sec = 30;
+  document.getElementById('countdownDisplay').textContent = sec;
+  countdownTimer = setInterval(() => {
+    sec--;
+    document.getElementById('countdownDisplay').textContent = sec;
+    if (sec <= 0) {
+      clearInterval(countdownTimer);
+      unlockAccount();
+    }
+  }, 1000);
+}
+
+function unlockAccount() {
+  state.locked = false;
+  state.attempts = 0;
+  document.getElementById('lockoutMsg').classList.remove('show');
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').textContent = 'Sign In';
+  document.getElementById('studentId').disabled = false;
+  document.getElementById('password').disabled = false;
+  document.getElementById('attemptBar').classList.remove('show');
+  ['dot1','dot2','dot3'].forEach(d => { document.getElementById(d).className = 'dot'; });
+  document.getElementById('attemptCount').textContent = '0 / 3';
+  showToast('success', '🔓', 'Account unlocked. You can try again.');
+}
+
+function handleLogout() {
+  switchScreen('loginScreen');
+  clearErrors();
+  document.getElementById('studentId').value = '';
+  document.getElementById('password').value = '';
+  state = { faculty: null, branch: null, year: null, attempts: 0, locked: false };
+  // Reset steps
+  goStepUI(1);
+  showToast('success', '👋', 'You have been signed out.');
+}
+
+// ======== APP NAVIGATION ========
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goStep(n) {
+  // Validate before advancing
+  if (n === 2 && !state.faculty) {
+    document.getElementById('errFaculty').classList.add('show');
+    return;
+  }
+  if (n === 3 && !state.branch) {
+    document.getElementById('errBranch').classList.add('show');
+    return;
+  }
+  if (n === 4 && !state.year) {
+    document.getElementById('errYear').classList.add('show');
+    return;
+  }
+
+  // Clear errors
+  ['errFaculty','errBranch','errYear'].forEach(e => {
+    document.getElementById(e).classList.remove('show');
+  });
+
+  if (n === 2) renderBranches();
+  if (n === 4) renderCourses();
+
+  goStepUI(n);
+}
+
+function goStepUI(n) {
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  const pages = ['stepFaculty','stepBranch','stepYear','stepCourses'];
+  if (pages[n-1]) document.getElementById(pages[n-1]).classList.add('active');
+
+  // Update step indicators
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step-ind-' + i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+// ======== FACULTY ========
+function renderFaculties() {
+  const grid = document.getElementById('facultyGrid');
+  grid.innerHTML = FACULTIES.map(f => `
+    <div class="select-card ${state.faculty === f.id ? 'selected' : ''}" onclick="selectFaculty('${f.id}')">
+      <div class="check">✓</div>
+      <div class="card-icon">${f.icon}</div>
+      <div class="card-title">${f.name}</div>
+      <div class="card-sub">${f.sub}</div>
+    </div>
+  `).join('');
+}
+
+function selectFaculty(id) {
+  state.faculty = id;
+  state.branch = null;
+  state.year = null;
+  document.getElementById('errFaculty').classList.remove('show');
+  renderFaculties();
+}
+
+// ======== BRANCH ========
+function renderBranches() {
+  const branches = BRANCHES[state.faculty] || [];
+  const fac = FACULTIES.find(f => f.id === state.faculty);
+  document.getElementById('branchSub').textContent = `Showing branches for ${fac ? fac.name : ''}`;
+  const grid = document.getElementById('branchGrid');
+  grid.innerHTML = branches.map(b => `
+    <div class="select-card ${state.branch === b.id ? 'selected' : ''}" onclick="selectBranch('${b.id}')">
+      <div class="check">✓</div>
+      <div class="card-icon">${b.icon}</div>
+      <div class="card-title">${b.name}</div>
+    </div>
+  `).join('');
+}
+
+function selectBranch(id) {
+  state.branch = id;
+  state.year = null;
+  document.getElementById('errBranch').classList.remove('show');
+  renderBranches();
+}
+
+// ======== YEAR ========
+function renderYears() {
+  const labels = ['Freshman','Sophomore','Junior','Senior'];
+  const grid = document.getElementById('yearGrid');
+  grid.innerHTML = [1,2,3,4].map(y => `
+    <div class="year-card ${state.year === y ? 'selected' : ''}" onclick="selectYear(${y})">
+      <div class="year-num">${y}</div>
+      <div class="year-label">${labels[y-1]}</div>
+    </div>
+  `).join('');
+}
+
+function selectYear(y) {
+  state.year = y;
+  document.getElementById('errYear').classList.remove('show');
+  renderYears();
+}
+
+// ======== COURSES ========
+function renderCourses() {
+  const key = state.branch + '-' + state.year;
+  const courses = COURSES[key] || null;
+  const fac = FACULTIES.find(f => f.id === state.faculty);
+  const branches = BRANCHES[state.faculty] || [];
+  const branch = branches.find(b => b.id === state.branch);
+  const yearLabels = ['Freshman','Sophomore','Junior','Senior'];
+
+  document.getElementById('courseTitle').textContent = `Year ${state.year} Courses`;
+  document.getElementById('courseBreadcrumb').innerHTML = `
+    <span>${fac ? fac.name : ''}</span>
+    <span class="sep">›</span>
+    <span>${branch ? branch.name : ''}</span>
+    <span class="sep">›</span>
+    <span>Year ${state.year} — ${yearLabels[state.year-1]}</span>
+  `;
+
+  const list = document.getElementById('courseList');
+
+  if (!courses || courses.length === 0) {
+    list.innerHTML = `
+      <div class="perm-error">
+        <div class="perm-icon">📭</div>
+        <div>
+          <div class="perm-title">No Courses Available Yet</div>
+          <div class="perm-sub">Course data for this branch/year hasn't been added yet. Be the first to contribute!</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = courses.map((c, ci) => `
+    <div class="course-card">
+      <div class="course-header" onclick="toggleCourse(${ci})">
+        <div class="course-meta">
+          <div class="course-code">${c.code} · ${c.credits} credits</div>
+          <div class="course-name">${c.name}</div>
+          <div class="course-tags">
+            <span class="tag blue">${c.type}</span>
+            <span class="tag ${c.difficulty === 'Hard' || c.difficulty === 'Advanced' ? 'purple' : c.difficulty === 'Medium' ? '' : 'green'}">${c.difficulty}</span>
+            <span class="tag">${c.reviews.length} review${c.reviews.length !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+        <button class="course-toggle" id="toggle-${ci}">▾ Details</button>
+      </div>
+      <div class="course-body" id="body-${ci}">
+        <div class="course-detail">${c.desc}</div>
+        <div class="reviews-section">
+          <div class="reviews-title">💬 Senior Reviews & Resources</div>
+          <div class="reviews-list" id="reviews-${ci}">
+            ${renderReviews(c.reviews)}
+          </div>
+          ${renderAddReview(ci)}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderReviews(reviews) {
+  if (reviews.length === 0) {
+    return `<div style="font-size:13px;color:var(--text3);padding:8px 0">No reviews yet — be the first to share your experience!</div>`;
+  }
+  return reviews.map(r => `
+    <div class="review-item">
+      <div class="review-top">
+        <div class="review-avatar" style="background:${r.color}">${r.author[0]}</div>
+        <div>
+          <div class="review-author">${r.author}</div>
+          <div class="review-year">${r.year}</div>
+        </div>
+        <div class="review-stars">${'⭐'.repeat(r.stars)}</div>
+      </div>
+      <div class="review-text">${r.text}</div>
+      ${r.files.length > 0 ? `
+        <div class="review-files">
+          ${r.files.map(f => `<div class="file-badge" onclick="downloadFile('${f}')">📄 ${f}</div>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function renderAddReview(ci) {
+  return `
+    <div class="add-review">
+      <div class="add-review-title">✍️ Share Your Experience</div>
+      <div class="star-select" id="stars-${ci}" onclick="rateCourse(event, ${ci})">
+        <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span>
+        <span data-v="4">☆</span><span data-v="5">☆</span>
+      </div>
+      <textarea class="review-input" id="review-text-${ci}" placeholder="Share tips, difficulty, exam format, advice for juniors..." style="margin-top:10px"></textarea>
+      <div id="file-preview-${ci}" class="file-preview"></div>
+      <div class="review-actions">
+        <button class="btn-sm" onclick="submitReview(${ci})">Post Review</button>
+        <label class="btn-file">
+          📎 Attach File
+          <input type="file" style="display:none" multiple onchange="handleFile(event, ${ci})">
+        </label>
+      </div>
+      <div id="submit-err-${ci}" class="submit-error">
+        <span>⚠️</span><span id="submit-err-text-${ci}"></span>
+      </div>
+    </div>
+  `;
+}
+
+let ratings = {};
+let attachedFiles = {};
+
+function rateCourse(e, ci) {
+  const val = parseInt(e.target.dataset.v);
+  if (!val) return;
+  ratings[ci] = val;
+  const stars = document.getElementById('stars-' + ci).children;
+  for (let i = 0; i < 5; i++) {
+    stars[i].textContent = i < val ? '⭐' : '☆';
+  }
+}
+
+function handleFile(e, ci) {
+  const files = Array.from(e.target.files);
+  if (!attachedFiles[ci]) attachedFiles[ci] = [];
+
+  const allowedTypes = ['application/pdf','application/zip','image/png','image/jpeg','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+  const maxSize = 20 * 1024 * 1024; // 20MB
+
+  for (const file of files) {
+    if (file.size > maxSize) {
+      showSubmitError(ci, `"${file.name}" is too large. Max file size is 20MB.`);
+      return;
+    }
+    attachedFiles[ci].push(file.name);
+  }
+
+  renderFilePreviews(ci);
+}
+
+function renderFilePreviews(ci) {
+  const container = document.getElementById('file-preview-' + ci);
+  if (!attachedFiles[ci] || !attachedFiles[ci].length) { container.innerHTML = ''; return; }
+  container.innerHTML = attachedFiles[ci].map((f, i) => `
+    <div class="file-chip">📄 ${f} <span class="remove" onclick="removeFile(${ci},${i})">✕</span></div>
+  `).join('');
+}
+
+function removeFile(ci, i) {
+  attachedFiles[ci].splice(i, 1);
+  renderFilePreviews(ci);
+}
+
+function submitReview(ci) {
+  const text = document.getElementById('review-text-' + ci).value.trim();
+  const rating = ratings[ci];
+
+  if (!text) {
+    showSubmitError(ci, 'Please write a review before posting.');
+    return;
+  }
+  if (!rating) {
+    showSubmitError(ci, 'Please give a star rating.');
+    return;
+  }
+
+  document.getElementById('submit-err-' + ci).classList.remove('show');
+
+  // Add review to data
+  const key = state.branch + '-' + state.year;
+  const course = COURSES[key]?.find((c, i) => i === ci);
+  if (!course) return;
+
+  const colors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];
+  course.reviews.push({
+    author: 'You',
+    year: `Year ${state.year}`,
+    stars: rating,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    text,
+    files: attachedFiles[ci] || [],
+  });
+
+  // Re-render reviews
+  document.getElementById('reviews-' + ci).innerHTML = renderReviews(course.reviews);
+  document.getElementById('review-text-' + ci).value = '';
+  ratings[ci] = 0;
+  attachedFiles[ci] = [];
+  renderFilePreviews(ci);
+
+  // Reset stars
+  const starEls = document.getElementById('stars-' + ci)?.children;
+  if (starEls) for (let s of starEls) s.textContent = '☆';
+
+  showToast('success', '✅', 'Your review has been posted!');
+}
+
+function showSubmitError(ci, msg) {
+  const el = document.getElementById('submit-err-' + ci);
+  document.getElementById('submit-err-text-' + ci).textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function toggleCourse(ci) {
+  const body = document.getElementById('body-' + ci);
+  const btn = document.getElementById('toggle-' + ci);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? '▾ Details' : '▴ Collapse';
+}
+
+function downloadFile(name) {
+  showToast('success', '📥', `Downloading "${name}"...`);
+}
+
+// ======== ERROR BANNER ========
+function showBanner(msg) {
+  document.getElementById('errorBannerMsg').textContent = msg;
+  document.getElementById('errorBanner').classList.add('show');
+}
+function dismissBanner() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
+
+// ======== TOAST ========
+function showToast(type, icon, text) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastText').textContent = text;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => closeToast(), 3500);
+}
+function closeToast() {
+  document.getElementById('toast').classList.remove('show');
+}
+
+// ======== INIT ========
+document.addEventListener('DOMContentLoaded', () => {
+  renderFaculties();
+  renderYears();
+
+  // Allow Enter key on login
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('studentId').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('password').focus();
+  });
+});
+</script>
+</body>
+</html>
